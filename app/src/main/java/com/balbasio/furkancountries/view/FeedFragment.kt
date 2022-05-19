@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_feed.*
 class FeedFragment : Fragment() {
     private lateinit var viewModel:FeedViewModel
 
-    private val countryAdapter:CountryAdapter()
+    private val countryAdapter:CountryAdapter(arrayListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +37,17 @@ class FeedFragment : Fragment() {
         viewModel.refreshData()
         countryList.layoutManager=LinearLayoutManager(context)
         countryList.adapter=countryAdapter
+
+        swipeRefreshLayout.setOnRefreshListener {
+            countryList.visibility=View.GONE
+            countryError.visibility=View.GONE
+            countryLoading.visibility=View.VISIBLE
+            swipeRefreshLayout.isRefreshing=false
+            viewModel.refreshFromAPI()
+        }
+        observeLiveData()
     }
-    fun observeLiveData(){
+    private fun observeLiveData(){
         viewModel.countries.observe(this, Observer {countries->
             countries?.let {
             countryList.visibility=View.VISIBLE
